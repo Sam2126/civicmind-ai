@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CivicMind AI — An AI-powered Decision Intelligence Platform that transforms city data into actionable insights for better communities." />
+  <meta name="keywords" content="AI, civic tech, smart city, decision intelligence, BigQuery, Vertex AI, Gemini" />
+  <meta property="og:title" content="CivicMind AI — Decision Intelligence Platform" />
+  <meta property="og:description" content="Transforming city data into smart decisions for every citizen." />
+  <title>CivicMind AI — Decision Intelligence Platform</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- App CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<!-- ============ LOADING SCREEN ============ -->
+<div id="app-loader">
+  <div class="loader-logo">
+    <div class="loader-logo-icon">🏙️</div>
+    <div class="loader-logo-text">CivicMind AI</div>
+  </div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar"></div>
+  </div>
+  <div class="loader-status" id="loader-status">Initializing AI systems...</div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="#">
+      <div class="sidebar-logo-icon">🏙️</div>
+      <div>
+        <div class="sidebar-logo-name">CivicMind AI</div>
+        <div class="sidebar-logo-tag">Decision Intelligence</div>
+      </div>
+    </a>
+
+    <div class="sidebar-section-label">Core Platform</div>
+
+    <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </span>
+      <span class="nav-label">Dashboard</span>
+    </div>
+
+    <div class="nav-item" data-view="chat" onclick="switchView('chat',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      <span class="nav-label">CivicChat AI</span>
+    </div>
+
+    <div class="nav-item" data-view="predict" onclick="switchView('predict',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </span>
+      <span class="nav-label">PredictEngine</span>
+    </div>
+
+    <div class="nav-item" data-view="alerts" onclick="switchView('alerts',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </span>
+      <span class="nav-label">Alert Radar</span>
+      <span class="nav-badge" id="alert-count-badge">7</span>
+    </div>
+
+    <div class="nav-item" data-view="decisions" onclick="switchView('decisions',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </span>
+      <span class="nav-label">DecisionAssist</span>
+    </div>
+
+    <div class="nav-item" data-view="geo" onclick="switchView('geo',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      </span>
+      <span class="nav-label">GeoView</span>
+    </div>
+
+    <div style="margin:6px 14px;height:1px;background:var(--border);opacity:.5"></div>
+
+    <div class="nav-item" data-view="techstack" onclick="switchView('techstack',this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </span>
+      <span class="nav-label">AI Tech Stack</span>
+      <span class="nav-badge" style="background:linear-gradient(135deg,#6366f1,#22d3ee);font-size:.6rem;letter-spacing:0">8 AI</span>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">SC</div>
+        <div>
+          <div class="user-name">Smart City Admin</div>
+          <div class="user-role">City Intelligence Officer</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <header class="main-header">
+      <div style="flex:1">
+        <div class="header-page-title" id="page-title">
+          City Intelligence Dashboard
+          <span class="header-subtitle" id="page-subtitle">Real-time analytics · Mumbai Metropolitan Region</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div style="display:flex;align-items:center;gap:7px;margin-right:8px">
+          <span style="font-size:.7rem;color:var(--text-muted);white-space:nowrap">Region:</span>
+          <select id="region-select" class="context-select" onchange="switchRegion(this.value)" style="padding:5px 10px;font-size:.78rem;min-width:130px">
+            <option value="mumbai">🏙️ Mumbai Metro</option>
+            <option value="rajasthan">🏜️ Rajasthan State</option>
+          </select>
+        </div>
+        <div class="header-time" id="live-clock">Loading...</div>
+        <div class="icon-btn" title="Notifications" onclick="switchView('alerts', document.querySelector('[data-view=alerts]'))">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="icon-btn" title="Refresh data" onclick="refreshData()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEWS CONTAINER -->
+    <div class="views-container">
+
+      <!-- ========== VIEW: DASHBOARD ========== -->
+      <div id="view-dashboard" class="view active">
+        <div class="view-topbar">
+          <div>
+            <h2>City Intelligence Dashboard</h2>
+            <p>Live civic analytics powered by Vertex AI &amp; BigQuery — updated every 60 seconds</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-live">● LIVE</span>
+            <button class="btn btn-outline btn-sm" onclick="exportReport()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card c-indigo">
+            <div class="stat-card-top">
+              <div class="stat-icon-wrap c-indigo">👥</div>
+              <div class="stat-trend up">↑ 12.4%</div>
+            </div>
+            <div class="stat-value" id="stat-citizens">0</div>
+            <div class="stat-label">Citizens Served</div>
+          </div>
+          <div class="stat-card c-emerald">
+            <div class="stat-card-top">
+              <div class="stat-icon-wrap c-emerald">🚨</div>
+              <div class="stat-trend down">↓ 3 today</div>
+            </div>
+            <div class="stat-value" id="stat-alerts">0</div>
+            <div class="stat-label">Active Alerts</div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="stat-card-top">
+              <div class="stat-icon-wrap c-amber">⚡</div>
+              <div class="stat-trend up">↑ 8.1%</div>
+            </div>
+            <div class="stat-value" id="stat-decisions">0</div>
+            <div class="stat-label">Decisions Made Today</div>
+          </div>
+          <div class="stat-card c-rose">
+            <div class="stat-card-top">
+              <div class="stat-icon-wrap c-rose">🎯</div>
+              <div class="stat-trend up">↑ 1.2%</div>
+            </div>
+            <div class="stat-value" id="stat-accuracy">0%</div>
+            <div class="stat-label">AI Model Accuracy</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">🚦 Traffic Flow Index</div>
+                <div class="chart-subtitle">24-hour city-wide vehicle count</div>
+              </div>
+              <span class="badge badge-live">● LIVE</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-traffic"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">🌱 Air Quality Index (AQI)</div>
+                <div class="chart-subtitle">Weekly city average — WHO standard</div>
+              </div>
+              <span class="badge badge-warning">Moderate</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-aqi"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">⚡ Energy Consumption</div>
+                <div class="chart-subtitle">Grid load vs. renewable (MW)</div>
+              </div>
+              <span class="badge badge-success">Stable</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-energy"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">🏥 Healthcare Wait Times</div>
+                <div class="chart-subtitle">Average wait by facility (minutes)</div>
+              </div>
+              <span class="badge badge-info">Updated 5m ago</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-health"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VIEW: CIVIC CHAT ========== -->
+      <div id="view-chat" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>CivicChat AI</h2>
+            <p>Ask anything about your city — powered by Gemini + RAG over BigQuery civic datasets</p>
+          </div>
+          <div class="view-topbar-actions">
+            <button class="btn btn-outline btn-sm" onclick="clearChat()">Clear Chat</button>
+          </div>
+        </div>
+        <div class="chat-layout">
+          <!-- Chat Main -->
+          <div class="chat-main">
+            <div class="chat-header-bar">
+              <div class="ai-avatar">🤖</div>
+              <div>
+                <div class="ai-name">CivicMind Assistant</div>
+                <div class="ai-status">Online — Gemini 1.5 Pro + RAG</div>
+              </div>
+              <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+                <span class="badge badge-purple">Vertex AI</span>
+                <span class="badge badge-info">BigQuery</span>
+              </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+              <!-- Welcome message injected by JS -->
+            </div>
+            <div id="typing-indicator" style="display:none">
+              <div class="typing-indicator">
+                <div class="msg-avatar ai">🤖</div>
+                <div class="typing-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <span style="font-size:.75rem;color:var(--text-muted)">Analyzing city data...</span>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <div class="chat-suggestions" id="chat-suggestions">
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">🚦 Current traffic status</div>
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">🌿 Air quality report</div>
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">🏥 Hospital wait times</div>
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">⚡ Energy grid status</div>
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">🚌 Best bus routes</div>
+                <div class="suggestion-chip" onclick="sendSuggestion(this)">🌧️ Flood risk zones</div>
+              </div>
+              <div class="chat-input-row">
+                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about traffic, health, environment, public services..." onkeydown="handleChatKey(event)"></textarea>
+                <button class="send-btn" onclick="sendChatMessage()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Chat Sidebar -->
+          <div class="chat-sidebar-panel">
+            <div class="info-card">
+              <div class="info-card-title">📡 Active Data Sources</div>
+              <div class="data-source-item"><div class="ds-dot" style="background:#6366f1"></div><div class="ds-name">Traffic Sensor Network</div><div class="ds-status">Live</div></div>
+              <div class="data-source-item"><div class="ds-dot" style="background:#22d3ee"></div><div class="ds-name">AQI Monitoring Grid</div><div class="ds-status">Live</div></div>
+              <div class="data-source-item"><div class="ds-dot" style="background:#10b981"></div><div class="ds-name">Healthcare HMS API</div><div class="ds-status">Live</div></div>
+              <div class="data-source-item"><div class="ds-dot" style="background:#f59e0b"></div><div class="ds-name">Smart Grid Telemetry</div><div class="ds-status">Live</div></div>
+              <div class="data-source-item"><div class="ds-dot" style="background:#a855f7"></div><div class="ds-name">Citizen Feedback DB</div><div class="ds-status">Live</div></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">🧠 AI Pipeline</div>
+              <div style="font-size:.8rem;color:var(--text-secondary);line-height:1.7">
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:1rem">1️⃣</span> Query → Gemini Embedding</div>
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:1rem">2️⃣</span> RAG over BigQuery Tables</div>
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:1rem">3️⃣</span> Context Assembly</div>
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0"><span style="font-size:1rem">4️⃣</span> Gemini Pro Generation</div>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">📊 Session Stats</div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Queries Today</span><span class="geo-stat-val" id="query-count">0</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Avg. Latency</span><span class="geo-stat-val">1.2s</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Confidence</span><span class="geo-stat-val" style="color:var(--emerald)">94.2%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VIEW: PREDICT ENGINE ========== -->
+      <div id="view-predict" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>PredictEngine</h2>
+            <p>AI-driven forecasting for urban systems — 7-day horizon using Vertex AI AutoML</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-purple">Vertex AI AutoML</span>
+          </div>
+        </div>
+        <div class="predict-controls">
+          <span class="predict-label">Forecast Model:</span>
+          <div class="model-tabs">
+            <button class="model-tab active" onclick="switchModel('traffic',this)">🚦 Traffic</button>
+            <button class="model-tab" onclick="switchModel('energy',this)">⚡ Energy</button>
+            <button class="model-tab" onclick="switchModel('health',this)">🏥 Healthcare</button>
+            <button class="model-tab" onclick="switchModel('aqi',this)">🌿 Air Quality</button>
+          </div>
+          <span class="predict-label" style="margin-left:12px">Horizon:</span>
+          <select class="context-select" id="horizon-select" onchange="updateForecast()">
+            <option value="7">7 Days</option>
+            <option value="14">14 Days</option>
+            <option value="30">30 Days</option>
+          </select>
+        </div>
+        <div class="predict-main-chart">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title" id="predict-chart-title">🚦 Traffic Flow Forecast</div>
+              <div class="chart-subtitle" id="predict-chart-sub">Historical + AI-predicted values · Confidence interval shown</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--text-secondary)">
+                <span style="display:inline-block;width:20px;height:2px;background:var(--indigo)"></span> Historical
+              </span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--text-secondary)">
+                <span style="display:inline-block;width:20px;height:2px;background:var(--amber);border-top:2px dashed var(--amber)"></span> Predicted
+              </span>
+            </div>
+          </div>
+          <div class="predict-chart-wrap"><canvas id="chart-predict"></canvas></div>
+        </div>
+        <div class="predict-stats-grid">
+          <div class="predict-stat">
+            <div class="predict-stat-icon">📈</div>
+            <div class="predict-stat-value" id="ps-mape" style="color:var(--emerald)">4.8%</div>
+            <div class="predict-stat-label">MAPE Error Rate</div>
+          </div>
+          <div class="predict-stat">
+            <div class="predict-stat-icon">🎯</div>
+            <div class="predict-stat-value" id="ps-accuracy" style="color:var(--indigo)">95.2%</div>
+            <div class="predict-stat-label">Forecast Accuracy</div>
+          </div>
+          <div class="predict-stat">
+            <div class="predict-stat-icon">📊</div>
+            <div class="predict-stat-value" id="ps-datapoints" style="color:var(--cyan)">2.4M</div>
+            <div class="predict-stat-label">Training Data Points</div>
+          </div>
+          <div class="predict-stat">
+            <div class="predict-stat-icon">⚡</div>
+            <div class="predict-stat-value" id="ps-latency" style="color:var(--amber)">0.8s</div>
+            <div class="predict-stat-label">Inference Latency</div>
+          </div>
+          <div class="predict-stat">
+            <div class="predict-stat-icon">🔄</div>
+            <div class="predict-stat-value" id="ps-retrain" style="color:var(--purple)">6h ago</div>
+            <div class="predict-stat-label">Last Model Retrain</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VIEW: ALERT RADAR ========== -->
+      <div id="view-alerts" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>Alert Radar</h2>
+            <p>AI-detected anomalies and critical city events — real-time monitoring via Cloud Functions</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-live">● MONITORING</span>
+            <button class="btn btn-outline btn-sm" onclick="loadAlerts()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="alert-filters">
+          <button class="filter-tab active" onclick="filterAlerts('all',this)">All Alerts (7)</button>
+          <button class="filter-tab" onclick="filterAlerts('crit',this)">🔴 Critical (2)</button>
+          <button class="filter-tab" onclick="filterAlerts('warn',this)">🟡 Warning (3)</button>
+          <button class="filter-tab" onclick="filterAlerts('info',this)">🔵 Info (2)</button>
+        </div>
+        <div class="alerts-grid" id="alerts-grid">
+          <!-- Alerts injected by JS -->
+        </div>
+      </div>
+
+      <!-- ========== VIEW: DECISION ASSIST ========== -->
+      <div id="view-decisions" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>DecisionAssist</h2>
+            <p>AI-generated recommendations for city officials — built on Gemini + city KPIs</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-purple">Gemini Pro</span>
+          </div>
+        </div>
+        <div class="decision-context-bar">
+          <span class="context-label">Focus Area:</span>
+          <select class="context-select" id="decision-context" onchange="renderDecisions()">
+            <option value="all">All Domains</option>
+            <option value="transport">Urban Mobility</option>
+            <option value="health">Healthcare</option>
+            <option value="env">Environment</option>
+            <option value="energy">Energy</option>
+            <option value="safety">Public Safety</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="renderDecisions()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Generate Insights
+          </button>
+        </div>
+        <div class="decisions-grid" id="decisions-grid">
+          <!-- Decision cards injected by JS -->
+        </div>
+      </div>
+
+      <!-- ========== VIEW: GEO VIEW ========== -->
+      <div id="view-geo" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>GeoView — City Intelligence Map</h2>
+            <p>Interactive spatial analytics across Mumbai Metropolitan Region</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-live">● LIVE</span>
+          </div>
+        </div>
+        <div class="geo-layout">
+          <div class="map-container">
+            <div id="civic-map"></div>
+            <div class="map-layer-toggles">
+              <div class="layer-toggle active" onclick="toggleLayer('traffic',this)">
+                <div class="layer-dot" style="background:#f43f5e"></div> Traffic Hotspots
+              </div>
+              <div class="layer-toggle active" onclick="toggleLayer('aqi',this)">
+                <div class="layer-dot" style="background:#f59e0b"></div> AQI Sensors
+              </div>
+              <div class="layer-toggle active" onclick="toggleLayer('health',this)">
+                <div class="layer-dot" style="background:#10b981"></div> Hospitals
+              </div>
+              <div class="layer-toggle active" onclick="toggleLayer('energy',this)">
+                <div class="layer-dot" style="background:#6366f1"></div> Energy Grid
+              </div>
+            </div>
+          </div>
+          <div class="geo-sidebar">
+            <div class="info-card">
+              <div class="info-card-title">📍 Region Overview</div>
+              <div class="geo-stat-item"><span class="geo-stat-name">City Area</span><span class="geo-stat-val">603 km²</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Population</span><span class="geo-stat-val">20.7M</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Active Sensors</span><span class="geo-stat-val" style="color:var(--emerald)">2,847</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Data Streams</span><span class="geo-stat-val" style="color:var(--cyan)">18</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">🚦 Traffic Summary</div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Congestion Points</span><span class="geo-stat-val" style="color:var(--rose)">12</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Avg. Speed</span><span class="geo-stat-val">28 km/h</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Road Incidents</span><span class="geo-stat-val" style="color:var(--amber)">4</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">🌿 Environment</div>
+              <div class="geo-stat-item"><span class="geo-stat-name">City AQI</span><span class="geo-stat-val" style="color:var(--amber)">89 (Moderate)</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">PM2.5</span><span class="geo-stat-val">38 µg/m³</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Green Cover</span><span class="geo-stat-val" style="color:var(--emerald)">22.4%</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">🏥 Healthcare</div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Active Hospitals</span><span class="geo-stat-val">47</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Avg. Wait</span><span class="geo-stat-val" style="color:var(--amber)">38 min</span></div>
+              <div class="geo-stat-item"><span class="geo-stat-name">Bed Occupancy</span><span class="geo-stat-val">74%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VIEW: TECH STACK ========== -->
+      <div id="view-techstack" class="view">
+        <div class="view-topbar">
+          <div>
+            <h2>AI Technology Stack</h2>
+            <p>8 Google Cloud AI services powering CivicMind's decision intelligence engine</p>
+          </div>
+          <div class="view-topbar-actions">
+            <span class="badge badge-live">● ALL ACTIVE</span>
+            <span class="badge badge-purple">GEN AI APAC</span>
+          </div>
+        </div>
+
+        <!-- AI Stats -->
+        <div class="stats-grid" style="margin-bottom:20px">
+          <div class="stat-card c-indigo">
+            <div class="stat-card-top"><div class="stat-icon-wrap c-indigo">🤖</div><div class="stat-trend up">● Live</div></div>
+            <div class="stat-value">8</div><div class="stat-label">AI Services Active</div>
+          </div>
+          <div class="stat-card c-emerald">
+            <div class="stat-card-top"><div class="stat-icon-wrap c-emerald">⚡</div><div class="stat-trend up">↑ Fast</div></div>
+            <div class="stat-value">0.8s</div><div class="stat-label">Avg AI Inference</div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="stat-card-top"><div class="stat-icon-wrap c-amber">📊</div><div class="stat-trend up">↑ Growing</div></div>
+            <div class="stat-value">2.4M+</div><div class="stat-label">Data Points/Day</div>
+          </div>
+          <div class="stat-card c-rose">
+            <div class="stat-card-top"><div class="stat-icon-wrap c-rose">🎯</div><div class="stat-trend up">↑ 1.2%</div></div>
+            <div class="stat-value">94.2%</div><div class="stat-label">Overall AI Accuracy</div>
+          </div>
+        </div>
+
+        <!-- Pipeline Visualization -->
+        <div class="info-card" style="margin-bottom:20px;padding:20px 24px">
+          <div class="info-card-title" style="margin-bottom:16px">🔄 AI Data-to-Decision Pipeline</div>
+          <div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:4px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(99,102,241,.15);border:2px solid var(--indigo);display:grid;place-items:center;font-size:18px">📡</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">City Sensors & APIs</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--indigo),var(--cyan));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,.15);border:2px solid var(--cyan);display:grid;place-items:center;font-size:18px">☁️</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">Cloud Functions + Pub/Sub</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--cyan),var(--sky));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(56,189,248,.15);border:2px solid var(--sky);display:grid;place-items:center;font-size:18px">📊</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">BigQuery Warehouse</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--sky),var(--purple));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(168,85,247,.15);border:2px solid var(--purple);display:grid;place-items:center;font-size:18px">🧠</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">Vertex AI + Embeddings</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--purple),var(--indigo));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(99,102,241,.15);border:2px solid var(--indigo);display:grid;place-items:center;font-size:18px">🤖</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">Gemini 1.5 Pro + RAG</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--indigo),var(--amber));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(245,158,11,.15);border:2px solid var(--amber);display:grid;place-items:center;font-size:18px">⚙️</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">ADK Agent Orchestration</div>
+            </div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--amber),var(--emerald));min-width:24px;margin-top:-22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(16,185,129,.15);border:2px solid var(--emerald);display:grid;place-items:center;font-size:18px">🏙️</div>
+              <div style="font-size:.7rem;text-align:center;color:var(--text-secondary);max-width:80px">CivicMind AI Dashboard</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Cards Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px" id="tech-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+    </div><!-- /views-container -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="app.js"></script>
+</body>
+</html>
