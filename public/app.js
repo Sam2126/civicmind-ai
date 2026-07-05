@@ -339,10 +339,10 @@ function updateGeoSidebar(rd) {
   // update region overview stats based on selected region
   const isRaj = currentRegion === 'rajasthan';
 
-  const areaEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(1) .geo-stat-val');
-  const popEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(2) .geo-stat-val');
-  const sensEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(3) .geo-stat-val');
-  const strEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(4) .geo-stat-val');
+  const areaEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(2) .geo-stat-val');
+  const popEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(3) .geo-stat-val');
+  const sensEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(4) .geo-stat-val');
+  const strEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(5) .geo-stat-val');
 
   if (areaEl) areaEl.textContent = isRaj ? '342,239 km²' : '603 km²';
   if (popEl)  popEl.textContent  = isRaj ? '80M+'        : '20.7M';
@@ -350,25 +350,25 @@ function updateGeoSidebar(rd) {
   if (strEl)  strEl.textContent  = isRaj ? '14'          : '18';
 
   // update traffic summary
-  const congEl  = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(1) .geo-stat-val');
-  const speedEl = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(2) .geo-stat-val');
-  const incEl   = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const congEl  = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const speedEl = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const incEl   = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(4) .geo-stat-val');
   if (congEl)  congEl.textContent  = isRaj ? '5'       : '12';
   if (speedEl) speedEl.textContent = isRaj ? '52 km/h' : '28 km/h';
   if (incEl)   incEl.textContent   = isRaj ? '2'       : '4';
 
   // update env stats
-  const aqiEl   = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(1) .geo-stat-val');
-  const pm25El  = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(2) .geo-stat-val');
-  const greenEl = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const aqiEl   = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const pm25El  = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const greenEl = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(4) .geo-stat-val');
   if (aqiEl)   aqiEl.textContent   = isRaj ? '165 (Very Unhealthy)' : '89 (Moderate)';
   if (pm25El)  pm25El.textContent  = isRaj ? '72 µg/m³'             : '38 µg/m³';
   if (greenEl) greenEl.textContent = isRaj ? '7.1%'                 : '22.4%';
 
   // update healthcare
-  const hospEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(1) .geo-stat-val');
-  const waitEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(2) .geo-stat-val');
-  const bedEl  = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const hospEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const waitEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(3) .geo-stat-val');
+  const bedEl  = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(4) .geo-stat-val');
   if (hospEl) hospEl.textContent = isRaj ? '38'    : '47';
   if (waitEl) waitEl.textContent = isRaj ? '54 min': '38 min';
   if (bedEl)  bedEl.textContent  = isRaj ? '81%'   : '74%';
