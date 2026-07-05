@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-CivicMind AI - Complete PPT Template Filler
-Team: Samarth Khandelwal & Bhavya Singh Shekhawat
-GEN AI APAC Challenge - PS1: AI for Better Living & Smarter Communities
-"""
+# CivicMind AI — PPT submission filler
+# Team: Samarth Khandelwal & Bhavya Singh Shekhawat
 
-import sys, os, copy
+import sys, os
 sys.stdout.reconfigure(encoding='utf-8')
 
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
-from lxml import etree
+from pptx.enum.text import MSO_AUTO_SIZE
 
 BASE     = r"c:\Users\samar\OneDrive\Desktop\GEN AI HACKATHOAN"
 TEMPLATE = os.path.join(BASE, "Prototype Submission Deck _ Gen AI Academy APAC Edition.pptx")
@@ -22,256 +19,243 @@ PIPE_IMG = os.path.join(BASE, "public", "pipeline.png")
 
 prs = Presentation(TEMPLATE)
 
-# ─── HELPER: fill a text frame properly matching template style ───────────────
-def fill_textframe(tf, lines, default_size=14, bold=False, color=(0,0,0), align=PP_ALIGN.LEFT):
-    """
-    lines: list of (text, size, bold, color, bullet_indent) tuples
-           OR a plain string (auto-split on newline)
-    """
+# color shortcuts
+BLACK   = (0, 0, 0)
+NAVY    = (15, 23, 42)
+BLUE    = (37, 99, 235)
+GREEN   = (22, 101, 52)
+PURPLE  = (88, 28, 135)
+
+
+def fill_tf(tf, lines, default_size=13):
+    """Fill a text frame. Lines = list of (text, size, bold, RGB-tuple, indent-level)."""
     tf.clear()
     tf.word_wrap = True
-
-    if isinstance(lines, str):
-        lines = [(l, default_size, bold, color, False) for l in lines.split('\n')]
+    # let PowerPoint shrink text to fit the box
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
 
     for idx, item in enumerate(lines):
         if isinstance(item, str):
-            text, size, b, col, indent = item, default_size, bold, color, False
+            text, size, bold, col, lvl = item, default_size, False, BLACK, 0
         else:
             text = item[0]
             size = item[1] if len(item) > 1 else default_size
-            b    = item[2] if len(item) > 2 else bold
-            col  = item[3] if len(item) > 3 else color
-            indent = item[4] if len(item) > 4 else False
+            bold = item[2] if len(item) > 2 else False
+            col  = item[3] if len(item) > 3 else BLACK
+            lvl  = item[4] if len(item) > 4 else 0
 
-        if idx == 0:
-            p = tf.paragraphs[0]
-        else:
-            p = tf.add_paragraph()
-
-        p.alignment = align
-        if indent:
-            p.level = 1
+        p = tf.paragraphs[0] if idx == 0 else tf.add_paragraph()
+        p.level = lvl
+        p.alignment = PP_ALIGN.LEFT
 
         run = p.add_run()
         run.text = text
         run.font.size = Pt(size)
-        run.font.bold = b
+        run.font.bold = bold
         run.font.color.rgb = RGBColor(*col)
 
-def add_pic(slide, img_path, left, top, width, height):
-    slide.shapes.add_picture(img_path,
-        Inches(left), Inches(top), Inches(width), Inches(height))
 
-BLACK = (0, 0, 0)
-DARK  = (30, 30, 60)   # dark navy for emphasis
-BLUE  = (37, 99, 235)  # accent blue
+def add_pic(slide, path, l, t, w, h):
+    slide.shapes.add_picture(path, Inches(l), Inches(t), Inches(w), Inches(h))
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 1 — Cover / Participant Details
-# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── SLIDE 1: Cover / Participant Details ──────────────────────────────────────
 s1 = prs.slides[0]
 for sh in s1.shapes:
     if sh.name == "Google Shape;55;p13":
-        fill_textframe(sh.text_frame, [
-            ("Participant Details",                                      18, True,  DARK,  False),
-            ("",                                                         10, False, BLACK, False),
-            ("Team Name:           CivicMind AI",                       16, False, BLACK, False),
-            ("Participant 1:       Samarth Khandelwal",                 16, False, BLACK, False),
-            ("Participant 2:       Bhavya Singh Shekhawat",             16, False, BLACK, False),
-            ("Problem Statement:   PS-1 — AI for Better Living & Smarter Communities (GEN AI APAC)", 15, False, BLACK, False),
-            ("Live Demo:           https://civicmind-ai-apac.web.app",  14, False, (37,99,235), False),
-            ("GitHub:              https://github.com/Sam2126/civicmind-ai", 14, False, (37,99,235), False),
+        fill_tf(sh.text_frame, [
+            ("Participant Details",                              16, True,  NAVY,  0),
+            ("",                                                 8, False, BLACK, 0),
+            ("Team:        CivicMind AI",                       13, False, BLACK, 0),
+            ("Member 1:    Samarth Khandelwal",                 13, False, BLACK, 0),
+            ("Member 2:    Bhavya Singh Shekhawat",             13, False, BLACK, 0),
+            ("PS-1 — AI for Better Living & Smarter Communities", 13, False, BLACK, 0),
+            ("Live Demo:   https://civicmind-ai-apac.web.app",  12, False, BLUE,  0),
+            ("GitHub:      https://github.com/Sam2126/civicmind-ai", 12, False, BLUE, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 2 — Brief About The Idea
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 2: Brief About The Idea ─────────────────────────────────────────────
 s2 = prs.slides[1]
 for sh in s2.shapes:
     if sh.name == "Google Shape;62;p14":
-        fill_textframe(sh.text_frame, [
-            ("CivicMind AI is a Decision Intelligence Platform that transforms raw city data into actionable insights for 20M+ citizens and city officials — in real time, powered entirely by Google Cloud AI.", 14, False, BLACK, False),
-            ("", 8, False, BLACK, False),
-            ("THE PROBLEM:", 13, True, DARK, False),
-            ("Modern cities generate massive volumes of data from traffic sensors, hospitals, AQI stations, smart grids, and citizen feedback — yet officials have no unified AI tool to detect crises early, understand complex relationships across domains, or generate evidence-based decisions at speed.", 13, False, BLACK, False),
-            ("", 8, False, BLACK, False),
-            ("OUR SOLUTION:", 13, True, DARK, False),
-            ("A single AI platform — powered by Gemini 1.5 Pro + Vertex AI AutoML + BigQuery + ADK — that ingests 2,847+ live city sensors, detects anomalies, predicts emergencies 6 hours ahead, and delivers intelligent recommendations in under 5 seconds.", 13, False, BLACK, False),
-            ("", 8, False, BLACK, False),
-            ("COVERAGE:  Mumbai Metropolitan Region (20.7M people)  +  Rajasthan State (80M+ people)", 13, True, (37,99,235), False),
-            ("", 8, False, BLACK, False),
-            ("KEY IMPACT:  95% faster incident detection  |  10,000x faster decisions  |  Rs.4.2Cr annual energy savings  |  24x earlier heatwave warnings", 12, False, (30,100,30), False),
+        fill_tf(sh.text_frame, [
+            ("What is CivicMind AI?", 14, True, NAVY, 0),
+            ("A Decision Intelligence Platform that transforms raw civic data into real-time AI recommendations for city officials and 20M+ citizens.", 12, False, BLACK, 0),
+            ("", 7, False, BLACK, 0),
+            ("The Problem:", 12, True, NAVY, 0),
+            ("Cities generate massive data from sensors, hospitals, traffic cameras, and AQI stations — but officials have no unified AI tool to act on it fast.", 12, False, BLACK, 0),
+            ("", 7, False, BLACK, 0),
+            ("Our Solution:", 12, True, NAVY, 0),
+            ("Gemini 1.5 Pro + Vertex AI AutoML + BigQuery + ADK v1.0, ingesting 2,847+ live sensors, predicting crises 6 hours ahead, recommending actions in <5 seconds.", 12, False, BLACK, 0),
+            ("", 7, False, BLACK, 0),
+            ("Coverage: Mumbai Metro (20.7M people) + Rajasthan State (80M+ people)", 12, True, BLUE, 0),
+            ("", 7, False, BLACK, 0),
+            ("Impact highlights:", 11, True, BLACK, 0),
+            ("  • 95% faster incident detection  |  10,000x faster decisions", 11, False, GREEN, 0),
+            ("  • Rs.4.2 Cr annual energy savings  |  24x earlier heatwave warnings", 11, False, GREEN, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 3 — Solution Explanation
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 3: Solution Explanation ─────────────────────────────────────────────
 s3 = prs.slides[2]
 for sh in s3.shapes:
-    # The big answer box (Shape;68) at bottom - our answer
     if sh.name == "Google Shape;68;p15":
-        fill_textframe(sh.text_frame, [
-            ("Built 100% on Google Cloud AI: Gemini 1.5 Pro  |  Vertex AI AutoML  |  Vertex AI Embeddings  |  Vertex AI Vision  |  ADK v1.0  |  BigQuery ML  |  Cloud Run  |  Firebase Hosting", 11, True, (37,99,235), False),
+        fill_tf(sh.text_frame, [
+            ("Built on Google Cloud AI: Gemini 1.5 Pro | Vertex AI AutoML | Vertex AI Embeddings | Vertex AI Vision | ADK v1.0 | BigQuery ML | Cloud Run | Firebase", 11, True, BLUE, 0),
         ])
-    # The instruction box (Shape;70) — we fill this with our full answer
     if sh.name == "Google Shape;70;p15":
-        fill_textframe(sh.text_frame, [
-            ("How We Built CivicMind AI on Google Cloud (PS-1: AI for Better Living)", 14, True, DARK, False),
-            ("", 6, False, BLACK, False),
-            ("APPROACH & GOOGLE CLOUD STACK:", 12, True, BLACK, False),
-            ("  1. DATA INGESTION: 2,847+ IoT sensors -> Cloud Functions (event triggers) -> Pub/Sub (real-time streaming) -> BigQuery (civic data warehouse with 18 dataset streams)", 12, False, BLACK, False),
-            ("  2. AI CORE: Gemini 1.5 Pro powers CivicChat NL Q&A + DecisionAssist via RAG over BigQuery city documents", 12, False, BLACK, False),
-            ("  3. FORECASTING: Vertex AI AutoML time-series models predict traffic, AQI, energy demand & hospital surge (7-day horizon)", 12, False, BLACK, False),
-            ("  4. MULTIMODAL: Vertex AI Vision (Gemini Vision) analyzes satellite imagery + CCTV feeds for real-time anomaly detection", 12, False, BLACK, False),
-            ("  5. AGENT AUTOMATION: ADK v1.0 multi-agent system auto-optimizes bus routes, waste collection & emergency pre-positioning", 12, False, BLACK, False),
-            ("  6. DEPLOYMENT: Cloud Run (serverless inference) + Firebase Hosting CDN -> https://civicmind-ai-apac.web.app", 12, False, BLACK, False),
-            ("", 6, False, BLACK, False),
-            ("REAL-WORLD IMPACT: Serves Mumbai (20.7M) + Rajasthan (80M+). Detects flood risk, heatwaves, traffic crises & hospital surges BEFORE they escalate.", 12, True, (30,100,30), False),
+        fill_tf(sh.text_frame, [
+            ("How We Built CivicMind AI (PS-1: AI for Better Living)", 13, True, NAVY, 0),
+            ("", 6, False, BLACK, 0),
+            ("1. DATA INGESTION", 12, True, BLACK, 0),
+            ("   2,847+ IoT sensors → Cloud Functions → Pub/Sub → BigQuery (18 datasets)", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("2. AI CORE", 12, True, BLACK, 0),
+            ("   Gemini 1.5 Pro: CivicChat NL Q&A + DecisionAssist via RAG over BigQuery", 11, False, BLACK, 0),
+            ("   Vertex AI AutoML: 7-day forecasts for traffic, AQI, energy, health", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("3. MULTIMODAL + AGENTS", 12, True, BLACK, 0),
+            ("   Vertex AI Vision: satellite imagery + CCTV anomaly detection", 11, False, BLACK, 0),
+            ("   ADK v1.0: auto-optimizes bus routes, waste collection, emergencies", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("4. DEPLOYMENT", 12, True, BLACK, 0),
+            ("   Cloud Run (serverless) + Firebase Hosting CDN → civicmind-ai-apac.web.app", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("IMPACT: Mumbai 20.7M + Rajasthan 80M+. Detects floods, heatwaves, surges before they escalate.", 11, True, GREEN, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 4 — Opportunities / USP
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 4: Opportunities / USP ──────────────────────────────────────────────
 s4 = prs.slides[3]
 for sh in s4.shapes:
     if sh.name == "Google Shape;77;p16":
-        fill_textframe(sh.text_frame, [
-            ("What Makes CivicMind AI Different from Existing Solutions:", 14, True, DARK, False),
-            ("", 6, False, BLACK, False),
-            ("1.  UNIFIED PLATFORM: Only solution combining Gemini NL interface + Vertex AI forecasting + ADK multi-agent automation + BigQuery analytics in one civic tool — competitors offer only one of these.", 13, False, BLACK, False),
-            ("2.  REAL CITY DATA RAG: CivicChat answers using live BigQuery civic data (not generic LLM hallucinations) — sourced from actual Mumbai & Rajasthan sensor networks.", 13, False, BLACK, False),
-            ("3.  PROACTIVE AI: Detects crises 6 hours ahead (heatwaves), vs. next-day manual detection — first mover in predictive governance.", 13, False, BLACK, False),
-            ("4.  DUAL-REGION SCALE: Proven across Mumbai Metro (20.7M) + Rajasthan (80M+) — 8 solution domains from mobility to disaster response.", 13, False, BLACK, False),
-            ("5.  RESPONSIBLE AI BUILT-IN: Every decision includes data source attribution, confidence score, step-by-step reasoning & mandatory human approval — no black box.", 13, False, BLACK, False),
-            ("", 6, False, BLACK, False),
-            ("QUANTIFIED USP:  Traffic detection 95% faster  |  Bus optimization 98% faster (ADK)  |  AQI alerts 98% faster  |  Decisions 10,000x faster (Gemini)  |  Data scale 1,000x (BigQuery 2.4M+ records)", 12, True, (37,99,235), False),
+        fill_tf(sh.text_frame, [
+            ("What Sets CivicMind AI Apart:", 13, True, NAVY, 0),
+            ("", 6, False, BLACK, 0),
+            ("1. UNIFIED PLATFORM", 12, True, BLACK, 0),
+            ("   Only tool combining Gemini NL + Vertex AI forecasting + ADK agents + BigQuery — competitors offer just one.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("2. REAL DATA (No Hallucinations)", 12, True, BLACK, 0),
+            ("   CivicChat answers from live BigQuery civic data, not generic LLM guesses.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("3. PROACTIVE AI", 12, True, BLACK, 0),
+            ("   Detects heatwaves 6 hours ahead vs. next-day manual detection.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("4. DUAL-REGION SCALE", 12, True, BLACK, 0),
+            ("   Proven across Mumbai Metro + Rajasthan: 8 domains, 100M+ citizens.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("5. RESPONSIBLE AI", 12, True, BLACK, 0),
+            ("   Every decision shows source, confidence score, and requires human approval.", 11, False, BLACK, 0),
+            ("", 6, False, BLACK, 0),
+            ("Quantified: Traffic detection 95% faster | ADK bus optimization 98% faster | 10,000x faster decisions (Gemini)", 11, True, BLUE, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 5 — Features
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 5: Features ─────────────────────────────────────────────────────────
 s5 = prs.slides[4]
 for sh in s5.shapes:
     if sh.name == "Google Shape;84;p17":
-        fill_textframe(sh.text_frame, [
-            ("CivicMind AI — 6 Core AI-Powered Features (All Live at https://civicmind-ai-apac.web.app):", 13, True, DARK, False),
-            ("", 6, False, BLACK, False),
-            ("1.  REAL-TIME DASHBOARD  [BigQuery + Chart.js]", 13, True, BLACK, False),
-            ("      Live KPIs: traffic flow, AQI index, energy load, hospital occupancy, water levels — updated every 30s from 2,847+ city sensors across Mumbai & Rajasthan.", 12, False, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("2.  CIVICHAT AI  [Gemini 1.5 Pro + Vertex AI Embeddings + AlloyDB RAG]", 13, True, BLACK, False),
-            ("      Ask any city question in natural language — 'Why is Dadar congested?' / 'Flood risk in Colaba?' Gemini answers with real BigQuery data, source attribution & confidence score.", 12, False, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("3.  PREDICTENGINE  [Vertex AI AutoML — time-series forecasting]", 13, True, BLACK, False),
-            ("      7-day forecasts for traffic volume, AQI, energy demand & hospital surge with confidence intervals. Trained on 18 civic datasets.", 12, False, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("4.  ALERT RADAR  [BigQuery ML anomaly detection + Gemini summarization]", 13, True, BLACK, False),
-            ("      Auto-detects anomalies across all domains, ranks by severity (Critical/High/Medium), generates plain-language alert summaries for officials.", 12, False, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("5.  DECISIONASSIST  [Gemini 1.5 Pro chain-of-thought + city KPIs]", 13, True, BLACK, False),
-            ("      Generates evidence-based policy recommendations with full reasoning chain, projected KPI impact, risk assessment & implementation steps.", 12, False, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("6.  GEOVIEW MAPS  [Vertex AI Vision + BigQuery GIS layers]", 13, True, BLACK, False),
-            ("      Interactive spatial analytics — satellite imagery analysis, flood-risk heatmaps, CCTV traffic monitoring, AQI pollution zones, heritage site crowd management.", 12, False, BLACK, False),
+        fill_tf(sh.text_frame, [
+            ("6 Core AI-Powered Features (live at civicmind-ai-apac.web.app):", 13, True, NAVY, 0),
+            ("", 5, False, BLACK, 0),
+            ("1. REAL-TIME DASHBOARD  [BigQuery]", 12, True, BLACK, 0),
+            ("   Live KPIs: traffic, AQI, energy, hospital occupancy from 2,847+ sensors", 11, False, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("2. CIVICHAT AI  [Gemini + RAG]", 12, True, BLACK, 0),
+            ("   Ask any civic question in plain English — AI answers with source + confidence", 11, False, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("3. PREDICTENGINE  [Vertex AI AutoML]", 12, True, BLACK, 0),
+            ("   7-day forecasts for traffic, AQI, energy, hospital demand", 11, False, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("4. ALERT RADAR  [BigQuery ML + Gemini]", 12, True, BLACK, 0),
+            ("   Auto-detects anomalies, ranks by severity, generates plain-language summaries", 11, False, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("5. DECISIONASSIST  [Gemini Pro]", 12, True, BLACK, 0),
+            ("   Evidence-based policy recommendations with step-by-step reasoning", 11, False, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("6. GEOVIEW MAPS  [Vertex AI Vision + BigQuery GIS]", 12, True, BLACK, 0),
+            ("   Satellite imagery, flood-risk heatmaps, AQI zones, crowd analytics", 11, False, BLACK, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 6 — Process Flow / Pipeline — pipeline.png
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 6: Process Flow / Pipeline ──────────────────────────────────────────
 s6 = prs.slides[5]
 for sh in s6.shapes:
     if sh.name == "Google Shape;91;p18":
-        fill_textframe(sh.text_frame, [
-            ("AI Data-to-Decision Pipeline: Raw City Data --> Cloud Functions + Pub/Sub --> BigQuery Warehouse --> Vertex AI Embeddings (RAG) --> Gemini 1.5 Pro --> ADK Multi-Agent --> Smart City Decisions", 12, True, DARK, False),
-            ("", 5, False, BLACK, False),
-            ("Responsible AI layer runs in parallel: Confidence Scoring | Source Attribution | Human Approval Gate | Full BigQuery Audit Trail", 11, False, (30,100,30), False),
+        fill_tf(sh.text_frame, [
+            ("AI Data-to-Decision Pipeline:", 12, True, NAVY, 0),
+            ("Raw City Data → Cloud Functions + Pub/Sub → BigQuery → Vertex AI Embeddings → Gemini 1.5 Pro → ADK Agents → Smart Decisions", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("Responsible AI layer: Confidence Scoring | Source Attribution | Human Approval Gate | BigQuery Audit Trail", 10, False, GREEN, 0),
         ])
-# Add pipeline image — fills the content area
-add_pic(s6, PIPE_IMG, left=0.3, top=1.55, width=9.4, height=3.9)
+add_pic(s6, PIPE_IMG, 0.3, 1.6, 9.4, 3.8)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 7 — Wireframes / Prototype Screenshots
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 7: Wireframes / Prototype ───────────────────────────────────────────
 s7 = prs.slides[6]
 for sh in s7.shapes:
     if sh.name == "Google Shape;98;p19":
-        fill_textframe(sh.text_frame, [
-            ("CivicMind AI — Live Interactive Prototype", 14, True, DARK, False),
-            ("Live at: https://civicmind-ai-apac.web.app  |  GitHub: https://github.com/Sam2126/civicmind-ai", 12, False, (37,99,235), False),
-            ("", 6, False, BLACK, False),
-            ("The prototype is a fully deployed Single Page Application (SPA) with 6 interactive tabs:", 13, True, BLACK, False),
-            ("", 4, False, BLACK, False),
-            ("  TAB 1 — Dashboard:        Live charts for traffic congestion %, AQI index, energy load MW, hospital occupancy % (Chart.js + BigQuery real-time)", 12, False, BLACK, False),
-            ("  TAB 2 — CivicChat AI:     Type any civic question -> Gemini 1.5 Pro answers with source + confidence. Try: 'AQI in Mumbai today?'", 12, False, BLACK, False),
-            ("  TAB 3 — PredictEngine:    Select domain (traffic/AQI/energy/health) -> View 7-day Vertex AI forecast with confidence bands", 12, False, BLACK, False),
-            ("  TAB 4 — Alert Radar:      Live anomaly feed auto-refreshes every 30s. Severity-ranked cards with Gemini-generated summaries", 12, False, BLACK, False),
-            ("  TAB 5 — DecisionAssist:   Select city challenge -> Gemini generates full recommendation report with KPI impact scores", 12, False, BLACK, False),
-            ("  TAB 6 — GeoView Maps:     Toggle AQI / Flood Risk / Traffic heatmap layers over Mumbai & Jaipur satellite base maps", 12, False, BLACK, False),
-            ("", 6, False, BLACK, False),
-            ("TECH STACK: HTML5 | CSS3 | Vanilla JS | Firebase Hosting CDN (Google Cloud) | Gemini API | BigQuery Streaming | Vertex AI", 11, True, (30,100,30), False),
+        fill_tf(sh.text_frame, [
+            ("Live Interactive Prototype", 13, True, NAVY, 0),
+            ("https://civicmind-ai-apac.web.app  |  GitHub: Sam2126/civicmind-ai", 11, False, BLUE, 0),
+            ("", 5, False, BLACK, 0),
+            ("6-tab Single Page App — all features live in the browser:", 12, True, BLACK, 0),
+            ("", 4, False, BLACK, 0),
+            ("  Tab 1 — Dashboard:       Live KPI charts (traffic, AQI, energy, healthcare)", 11, False, BLACK, 0),
+            ("  Tab 2 — CivicChat AI:    Type any civic question → Gemini answers with source", 11, False, BLACK, 0),
+            ("  Tab 3 — PredictEngine:   7-day Vertex AI forecast with confidence bands", 11, False, BLACK, 0),
+            ("  Tab 4 — Alert Radar:     Real-time severity-ranked anomaly cards", 11, False, BLACK, 0),
+            ("  Tab 5 — DecisionAssist:  AI-generated policy recommendations + KPI impact", 11, False, BLACK, 0),
+            ("  Tab 6 — GeoView Maps:    AQI / Flood / Traffic heatmap layers over Mumbai & Jaipur", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("Built with: HTML5 | CSS3 | Vanilla JS | Firebase CDN | Gemini API | BigQuery | Vertex AI", 10, True, GREEN, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 8 — Architecture Diagram — architecture.png
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 8: Architecture Diagram ─────────────────────────────────────────────
 s8 = prs.slides[7]
 for sh in s8.shapes:
     if sh.name == "Google Shape;105;p20":
-        fill_textframe(sh.text_frame, [
-            ("5-Layer Architecture: Data Sources (2,847+ sensors) -> Google Cloud Ingestion (Cloud Functions, Pub/Sub, Cloud Storage) -> AI Core (BigQuery, Gemini 1.5 Pro, Vertex AI AutoML/Vision/Embeddings, ADK) -> CivicMind Features (6 modules) -> Stakeholders (City Officials, 20M+ Citizens, Emergency Services, Urban Planners)", 11, True, DARK, False),
+        fill_tf(sh.text_frame, [
+            ("5-Layer Architecture: Data Sources (2,847+ sensors) → Cloud Ingestion (Functions, Pub/Sub) → AI Core (BigQuery, Gemini, Vertex AI, ADK) → Features (6 modules) → Stakeholders (Officials, 20M+ Citizens)", 11, True, NAVY, 0),
         ])
-# Add architecture image
-add_pic(s8, ARCH_IMG, left=0.3, top=1.45, width=9.4, height=4.0)
+add_pic(s8, ARCH_IMG, 0.3, 1.5, 9.4, 4.0)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 9 — Technologies / Google Services
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 9: Technologies / Google Services ───────────────────────────────────
 s9 = prs.slides[8]
 for sh in s9.shapes:
     if sh.name == "Google Shape;112;p21":
-        fill_textframe(sh.text_frame, [
-            ("Google Cloud AI Stack — 12 Services Used & Why:", 14, True, DARK, False),
-            ("", 5, False, BLACK, False),
-            ("1. Gemini 1.5 Pro (Google DeepMind) — CivicChat NL Q&A, DecisionAssist chain-of-thought, Alert summarization, RAG reasoning. Chosen: best-in-class multimodal LLM with 1M token context for large city documents.", 12, False, BLACK, False),
-            ("2. Vertex AI AutoML (time-series) — PredictEngine 7-day forecasts. Chosen: managed training with no ML expertise needed; proven on civic time-series.", 12, False, BLACK, False),
-            ("3. Vertex AI Embeddings (text-embedding-004) — RAG pipeline semantic search. Chosen: state-of-art embeddings tightly integrated with AlloyDB vector store.", 12, False, BLACK, False),
-            ("4. Vertex AI Vision (Gemini Vision) — Satellite imagery & CCTV analysis. Chosen: zero-shot multimodal; no custom training needed for civic visual anomalies.", 12, False, BLACK, False),
-            ("5. Agent Dev Kit (ADK v1.0) — Multi-agent orchestration for bus routes, waste mgmt, emergency workflows. Chosen: production-ready Google agent framework.", 12, False, BLACK, False),
-            ("6. BigQuery — Civic data warehouse, BigQuery ML anomaly detection, 18 streaming datasets, 2.4M+ records. Chosen: serverless, scales to petabytes, in-DB ML.", 12, False, BLACK, False),
-            ("7. Cloud Run — Serverless AI inference API. Chosen: auto-scales to zero, cost-efficient, no infra management.", 12, False, BLACK, False),
-            ("8. Cloud Functions + Pub/Sub — Event-driven sensor ingestion, real-time streaming from 2,847+ IoT devices. Chosen: sub-second latency, managed.", 12, False, BLACK, False),
-            ("9. Firebase Hosting — Global CDN: https://civicmind-ai-apac.web.app. Chosen: sub-100ms global latency, one-command deploy.", 12, False, BLACK, False),
-            ("10. AlloyDB — pgvector store for RAG knowledge base. Chosen: Google-managed Postgres with native vector similarity search.", 12, False, BLACK, False),
-            ("", 5, False, BLACK, False),
-            ("SCALABILITY: Pub/Sub + BigQuery + Cloud Run auto-scale to 10x data growth with ZERO infrastructure changes. Supports any Indian city.", 12, True, (30,100,30), False),
+        fill_tf(sh.text_frame, [
+            ("Google Cloud AI Stack — 12 Services, Why Each Was Chosen:", 13, True, NAVY, 0),
+            ("", 5, False, BLACK, 0),
+            ("1. Gemini 1.5 Pro — CivicChat NL Q&A, DecisionAssist, alert summarization. 1M token context for large city documents.", 11, False, BLACK, 0),
+            ("2. Vertex AI AutoML (time-series) — PredictEngine 7-day forecasts. No ML expertise needed; proven on civic data.", 11, False, BLACK, 0),
+            ("3. Vertex AI Embeddings (text-embedding-004) — RAG semantic search over BigQuery. Tight AlloyDB integration.", 11, False, BLACK, 0),
+            ("4. Vertex AI Vision — Satellite imagery + CCTV analysis. Zero-shot; no custom training needed.", 11, False, BLACK, 0),
+            ("5. ADK v1.0 — Multi-agent orchestration: bus routes, waste mgmt, emergency workflows.", 11, False, BLACK, 0),
+            ("6. BigQuery — 18 streaming civic datasets, BigQuery ML anomaly detection, 2.4M+ records.", 11, False, BLACK, 0),
+            ("7. Cloud Run — Serverless AI inference API. Auto-scales, cost-efficient.", 11, False, BLACK, 0),
+            ("8. Cloud Functions + Pub/Sub — Event-driven sensor ingestion, sub-second latency.", 11, False, BLACK, 0),
+            ("9. Firebase Hosting — Global CDN: civicmind-ai-apac.web.app. Sub-100ms load.", 11, False, BLACK, 0),
+            ("10. AlloyDB — pgvector store for RAG knowledge base. Native vector similarity.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("Scalability: Pub/Sub + BigQuery + Cloud Run auto-scale to 10x data growth with zero infra changes.", 11, True, GREEN, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SLIDE 10 — Prototype Snapshots
-# ═══════════════════════════════════════════════════════════════════════════════
+# ── SLIDE 10: Prototype Snapshots ─────────────────────────────────────────────
 s10 = prs.slides[9]
 for sh in s10.shapes:
     if sh.name == "Google Shape;120;p22":
-        fill_textframe(sh.text_frame, [
-            ("Live Prototype: https://civicmind-ai-apac.web.app", 14, True, (37,99,235), False),
-            ("GitHub Repository: https://github.com/Sam2126/civicmind-ai", 13, False, (37,99,235), False),
-            ("", 6, False, BLACK, False),
-            ("PROTOTYPE HIGHLIGHTS (test these live in the browser):", 13, True, DARK, False),
-            ("", 4, False, BLACK, False),
-            ("  DASHBOARD: Real-time KPI cards — Traffic: 73% congestion | AQI: 127 (Moderate) | Energy: 8,847 MW | Hospital: 84% occupancy", 12, False, BLACK, False),
-            ("  CIVICHAT: Ask 'What is the AQI in Mumbai?' -> Gemini answers: 'AQI is 127 (Moderate). Primary pollutant: PM2.5. Source: 312 MPCB stations. Confidence: 94%'", 12, False, BLACK, False),
-            ("  PREDICTENGINE: '7-day AQI forecast: Mon 134, Tue 128, Wed 119... Monsoon approaching — improving trend. Vertex AI AutoML confidence: 87%'", 12, False, BLACK, False),
-            ("  ALERT RADAR: [CRITICAL] Hospital surge detected — KEM Hospital at 97% capacity. Gemini recommendation: Activate overflow protocol.", 12, False, BLACK, False),
-            ("  DECISIONASSIST: 'Optimize Andheri bus routes' -> ADK generates: Re-route 213 buses, add 12 express services, estimated 18% delay reduction.", 12, False, BLACK, False),
-            ("  GEOVIEW: Flood risk heatmap shows Kurla, Dharavi, Colaba at HIGH risk during monsoon — pre-positioning NDRF teams recommended.", 12, False, BLACK, False),
-            ("", 6, False, BLACK, False),
-            ("TEAM:  Samarth Khandelwal  |  Bhavya Singh Shekhawat", 13, True, DARK, False),
-            ("GEN AI APAC Challenge — PS-1: AI for Better Living & Smarter Communities", 12, False, (37,99,235), False),
+        fill_tf(sh.text_frame, [
+            ("Live Prototype: https://civicmind-ai-apac.web.app", 13, True, BLUE, 0),
+            ("GitHub: https://github.com/Sam2126/civicmind-ai", 12, False, BLUE, 0),
+            ("", 6, False, BLACK, 0),
+            ("Try these in the browser:", 12, True, NAVY, 0),
+            ("", 4, False, BLACK, 0),
+            ("  Dashboard: Traffic 73% | AQI 127 (Moderate) | Energy 8,847 MW | Hospital 84%", 11, False, BLACK, 0),
+            ("  CivicChat: Ask 'AQI in Mumbai?' → Gemini: '127 Moderate, PM2.5, 312 MPCB stations, 94% conf.'", 11, False, BLACK, 0),
+            ("  PredictEngine: '7-day AQI: Mon 134, Tue 128, Wed 119... Monsoon approaching, improving trend.'", 11, False, BLACK, 0),
+            ("  Alert Radar: [CRITICAL] KEM Hospital 97% capacity. Activate overflow protocol.", 11, False, BLACK, 0),
+            ("  DecisionAssist: 'Optimize Andheri buses' → Re-route 213 buses, add 12 express, 18% delay cut.", 11, False, BLACK, 0),
+            ("  GeoView: Flood risk heatmap — Kurla, Dharavi, Colaba at HIGH risk. Pre-position NDRF.", 11, False, BLACK, 0),
+            ("", 5, False, BLACK, 0),
+            ("Team: Samarth Khandelwal | Bhavya Singh Shekhawat", 12, True, NAVY, 0),
+            ("GEN AI APAC — PS-1: AI for Better Living & Smarter Communities", 11, False, BLUE, 0),
         ])
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Save
-# ═══════════════════════════════════════════════════════════════════════════════
 prs.save(OUTPUT)
 print("[OK] Saved:", OUTPUT)

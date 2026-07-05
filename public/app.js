@@ -1,11 +1,10 @@
-/* ===========================================
-   CivicMind AI — Application Logic
-   Gemini + Vertex AI + BigQuery Simulation
-   =========================================== */
+// CivicMind AI — app logic
+// Samarth Khandelwal & Bhavya Singh Shekhawat
+// GEN AI APAC Challenge — PS1
 
 'use strict';
 
-/* ---------- GLOBAL STATE ---------- */
+// global state
 let charts = {};
 let currentAlertFilter = 'all';
 let currentModel = 'traffic';
@@ -226,7 +225,7 @@ const DECISIONS = [
     impacts:[{v:'25 km',l:'New Cycle Lanes'},{v:'22K',l:'Daily Cyclists'},{v:'18%',l:'Mode Shift'} ]}
 ];
 
-/* ---------- CHART DEFAULTS ---------- */
+// shared chart options — tooltip style, grid colors etc
 const CHART_DEFAULTS = {
   plugins: { legend: { display: false }, tooltip: {
     backgroundColor: 'rgba(9,15,31,0.95)',
@@ -297,49 +296,82 @@ function initApp() {
   setInterval(refreshLiveData, 60000);
 }
 
-/* ============ REGION SWITCHER ============ */
+// region switcher — updates all data, charts, alerts, and map
 function switchRegion(region) {
   currentRegion = region;
   const rd = getRegionData();
 
-  // Update subtitle
   const sub = document.getElementById('page-subtitle');
   if (sub) sub.textContent = `Real-time analytics · ${rd.region}`;
 
-  // Update stat targets
+  const geoDesc = document.getElementById('geo-view-desc');
+  if (geoDesc) geoDesc.textContent = `Interactive spatial analytics across ${rd.region}`;
+
   animateCount('stat-citizens', rd.stats.citizens, v => v.toLocaleString('en-IN'));
   animateCount('stat-alerts',   rd.stats.alerts,   v => v.toString());
   animateCount('stat-decisions',rd.stats.decisions, v => v.toString());
   animateAccuracy('stat-accuracy', rd.stats.accuracy);
 
-  // Update badge count
   const badge = document.getElementById('alert-count-badge');
   if (badge) badge.textContent = rd.stats.alerts;
 
-  // Refresh charts
   updateChartsForRegion(rd);
-
-  // Refresh alerts
   loadAlerts();
+  updateGeoSidebar(rd);
 
-  // Reset map
+  // destroy map so it re-initializes with correct region markers
   if (mapInstance) {
     mapInstance.remove();
     mapInstance = null;
     Object.keys(mapLayers).forEach(k => mapLayers[k] = []);
+    layerVisibility = { traffic: true, aqi: true, health: true, energy: true };
+    // re-init if user is on geo view
+    const geoView = document.getElementById('view-geo');
+    if (geoView && geoView.classList.contains('active')) {
+      setTimeout(() => initMap(), 150);
+    }
   }
-
-  // Update geo sidebar info
-  updateGeoSidebar(rd);
 
   showToast(`🗺️ Switched to ${rd.region} data`);
 }
 
 function updateGeoSidebar(rd) {
-  if (currentRegion === 'rajasthan') {
-    const el = document.querySelector('.geo-stat-item:first-child .geo-stat-val');
-    // silently update if geo sidebar exists
-  }
+  // update region overview stats based on selected region
+  const isRaj = currentRegion === 'rajasthan';
+
+  const areaEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(1) .geo-stat-val');
+  const popEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(2) .geo-stat-val');
+  const sensEl = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(3) .geo-stat-val');
+  const strEl  = document.querySelector('.geo-sidebar .info-card:first-child .geo-stat-item:nth-child(4) .geo-stat-val');
+
+  if (areaEl) areaEl.textContent = isRaj ? '342,239 km²' : '603 km²';
+  if (popEl)  popEl.textContent  = isRaj ? '80M+'        : '20.7M';
+  if (sensEl) sensEl.textContent = isRaj ? '1,240'       : '2,847';
+  if (strEl)  strEl.textContent  = isRaj ? '14'          : '18';
+
+  // update traffic summary
+  const congEl  = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(1) .geo-stat-val');
+  const speedEl = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const incEl   = document.querySelector('.geo-sidebar .info-card:nth-child(2) .geo-stat-item:nth-child(3) .geo-stat-val');
+  if (congEl)  congEl.textContent  = isRaj ? '5'       : '12';
+  if (speedEl) speedEl.textContent = isRaj ? '52 km/h' : '28 km/h';
+  if (incEl)   incEl.textContent   = isRaj ? '2'       : '4';
+
+  // update env stats
+  const aqiEl   = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(1) .geo-stat-val');
+  const pm25El  = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const greenEl = document.querySelector('.geo-sidebar .info-card:nth-child(3) .geo-stat-item:nth-child(3) .geo-stat-val');
+  if (aqiEl)   aqiEl.textContent   = isRaj ? '165 (Very Unhealthy)' : '89 (Moderate)';
+  if (pm25El)  pm25El.textContent  = isRaj ? '72 µg/m³'             : '38 µg/m³';
+  if (greenEl) greenEl.textContent = isRaj ? '7.1%'                 : '22.4%';
+
+  // update healthcare
+  const hospEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(1) .geo-stat-val');
+  const waitEl = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(2) .geo-stat-val');
+  const bedEl  = document.querySelector('.geo-sidebar .info-card:nth-child(4) .geo-stat-item:nth-child(3) .geo-stat-val');
+  if (hospEl) hospEl.textContent = isRaj ? '38'    : '47';
+  if (waitEl) waitEl.textContent = isRaj ? '54 min': '38 min';
+  if (bedEl)  bedEl.textContent  = isRaj ? '81%'   : '74%';
 }
 
 function updateChartsForRegion(rd) {
@@ -375,7 +407,7 @@ function updateChartsForRegion(rd) {
   charts.health.update();
 }
 
-/* ============ CLOCK ============ */
+// IST clock in header
 function startClock() {
   const update = () => {
     const now = new Date();
@@ -387,7 +419,7 @@ function startClock() {
   setInterval(update, 1000);
 }
 
-/* ============ NAVIGATION ============ */
+// nav view switcher
 function switchView(viewId, navEl) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -419,7 +451,7 @@ function switchView(viewId, navEl) {
   }
 }
 
-/* ============ STAT COUNTER ANIMATION ============ */
+// animated stat counters on load
 function animateStats() {
   const rd = getRegionData();
   animateCount('stat-citizens', rd.stats.citizens, v => v.toLocaleString('en-IN'));
@@ -452,7 +484,7 @@ function animateAccuracy(id, target) {
   }, 20);
 }
 
-/* ============ DASHBOARD CHARTS ============ */
+// init all 4 dashboard charts
 function initDashboardCharts() {
   const grad = (ctx, c1, c2) => {
     const g = ctx.createLinearGradient(0, 0, 0, 200);
@@ -584,7 +616,7 @@ function initDashboardCharts() {
   });
 }
 
-/* ============ PREDICT CHART ============ */
+// predict engine chart
 function initPredictChart() {
   const ctx = document.getElementById('chart-predict').getContext('2d');
   const d = PREDICT_DATA[currentModel];
@@ -668,7 +700,7 @@ function updatePredictStats(d) {
   document.getElementById('ps-retrain').textContent = d.ret;
 }
 
-/* ============ RAJASTHAN ALERTS ============ */
+// rajasthan-specific alert data
 const RAJASTHAN_ALERTS = [
   { id:101, type:'crit', icon:'🌡️', title:'Extreme Heatwave Warning — Barmer & Jaisalmer',
     meta:[{i:'📍',t:'Western Rajasthan'},{i:'🕐',t:'11:00 AM'},{i:'🌡️',t:'48.2°C recorded'}],
@@ -700,7 +732,7 @@ const RAJASTHAN_ALERTS = [
     actions:['View Feed','Download Report'] }
 ];
 
-/* ============ ALERTS ============ */
+// alerts — load and render based on current region
 function loadAlerts() {
   // Update filter counts based on region
   const alerts = currentRegion === 'rajasthan' ? RAJASTHAN_ALERTS : ALERTS;
@@ -755,7 +787,8 @@ function renderAlerts(filter) {
 }
 
 function alertAction(action, id) {
-  const alert = ALERTS.find(a => a.id === id);
+  const allAlerts = currentRegion === 'rajasthan' ? RAJASTHAN_ALERTS : ALERTS;
+  const alert = allAlerts.find(a => a.id === id);
   if (action === 'Acknowledge') {
     showToast(`✅ Alert acknowledged by AI system`);
   } else if (action === 'View on Map' || action === 'View Map') {
@@ -765,7 +798,7 @@ function alertAction(action, id) {
   }
 }
 
-/* ============ DECISIONS ============ */
+// decision assist cards
 function renderDecisions() {
   const domain = document.getElementById('decision-context').value;
   const grid = document.getElementById('decisions-grid');
@@ -821,7 +854,7 @@ function implementDecision(title) {
   showToast(`🤖 CivicMind AI Agent (ADK) is implementing: ${title.substring(0,35)}...`);
 }
 
-/* ============ CIVIC CHAT ============ */
+// CivicChat responses keyed by keyword
 const AI_RESPONSES = [
   {
     kw: ['traffic','congestion','road','commute','delay','drive','jam'],
@@ -1073,91 +1106,9 @@ function clearChat() {
   if (qEl) qEl.textContent = '0';
 }
 
-/* ============ GEO MAP ============ */
-function initMap() {
-  if (mapInstance) return;
+// leaflet map — region-aware, loaded lazily when GeoView tab is clicked
 
-  mapInstance = L.map('civic-map', { zoomControl: false, attributionControl: false }).setView([19.076, 72.877], 12);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '', maxZoom: 19
-  }).addTo(mapInstance);
-
-  L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
-
-  const trafficPoints = [
-    { pos:[19.0545,72.9376], label:'Eastern Expressway', status:'🔴 Severe Congestion', speed:'4 km/h', color:'#f43f5e' },
-    { pos:[19.1197,72.8468], label:'Western Expressway - Andheri', status:'🟡 Moderate', speed:'28 km/h', color:'#f59e0b' },
-    { pos:[19.0176,72.8562], label:'Marine Drive', status:'🟢 Clear', speed:'52 km/h', color:'#10b981' },
-    { pos:[19.0659,72.8362], label:'Bandra-Worli Sea Link', status:'🟡 Light Traffic', speed:'70 km/h', color:'#f59e0b' },
-    { pos:[19.0986,72.8492], label:'Santacruz Junction', status:'🔴 Heavy', speed:'8 km/h', color:'#f43f5e' }
-  ];
-
-  const aqiPoints = [
-    { pos:[19.0421,72.8512], label:'Dharavi AQI Station', aqi:187, level:'Very Unhealthy', color:'#f43f5e' },
-    { pos:[19.1136,72.8697], label:'Andheri AQI Station', aqi:112, level:'Unhealthy', color:'#f59e0b' },
-    { pos:[19.0596,72.8295], label:'Bandra AQI Station', aqi:78, level:'Moderate', color:'#f59e0b' },
-    { pos:[19.1197,72.9088], label:'Powai AQI Station', aqi:61, level:'Good', color:'#10b981' }
-  ];
-
-  const healthPoints = [
-    { pos:[19.0388,72.8457], label:'LTMG Hospital', beds:8, wait:'55 min', color:'#10b981' },
-    { pos:[19.0710,72.8335], label:'KEM Hospital', beds:24, wait:'41 min', color:'#10b981' },
-    { pos:[19.1062,72.8268], label:'Kokilaben Hospital', beds:47, wait:'22 min', color:'#10b981' },
-    { pos:[19.0576,72.8305], label:'Lilavati Hospital', beds:28, wait:'31 min', color:'#f59e0b' },
-    { pos:[19.0183,72.8553], label:'St. Mary\'s Hospital', beds:3, wait:'71 min', color:'#f43f5e' }
-  ];
-
-  const energyPoints = [
-    { pos:[19.0627,72.8545], label:'Bandra-Kurla Substation', load:'94%', status:'🔴 Overload Risk', color:'#f43f5e' },
-    { pos:[19.1237,72.8396], label:'Andheri Substation', load:'71%', status:'🟡 Moderate', color:'#f59e0b' },
-    { pos:[19.2183,72.9781], label:'Thane West Substation', load:'58%', status:'🟢 Stable', color:'#10b981' },
-    { pos:[19.0330,73.0297], label:'Navi Mumbai Grid', load:'49%', status:'🟢 Good', color:'#10b981' }
-  ];
-
-  function makeIcon(color, emoji) {
-    return L.divIcon({
-      html: `<div style="background:${color};width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 10px ${color}88">${emoji}</div>`,
-      iconSize: [28,28], iconAnchor: [14,14], className: ''
-    });
-  }
-
-  trafficPoints.forEach(p => {
-    const m = L.marker(p.pos, { icon: makeIcon(p.color, '🚦') }).addTo(mapInstance);
-    m.bindPopup(`<strong style="color:#f1f5f9">${p.label}</strong><br><span style="color:#94a3b8">Status: ${p.status}</span><br><span style="color:#94a3b8">Avg Speed: ${p.speed}</span>`);
-    mapLayers.traffic.push(m);
-  });
-
-  aqiPoints.forEach(p => {
-    const m = L.marker(p.pos, { icon: makeIcon(p.color, '🌿') }).addTo(mapInstance);
-    m.bindPopup(`<strong style="color:#f1f5f9">${p.label}</strong><br><span style="color:#94a3b8">AQI: <strong style="color:${p.color}">${p.aqi}</strong></span><br><span style="color:#94a3b8">Level: ${p.level}</span>`);
-    mapLayers.aqi.push(m);
-  });
-
-  healthPoints.forEach(p => {
-    const m = L.marker(p.pos, { icon: makeIcon(p.color, '🏥') }).addTo(mapInstance);
-    m.bindPopup(`<strong style="color:#f1f5f9">${p.label}</strong><br><span style="color:#94a3b8">Wait: <strong style="color:${p.color}">${p.wait}</strong></span><br><span style="color:#94a3b8">Beds Available: ${p.beds}</span>`);
-    mapLayers.health.push(m);
-  });
-
-  energyPoints.forEach(p => {
-    const m = L.marker(p.pos, { icon: makeIcon(p.color, '⚡') }).addTo(mapInstance);
-    m.bindPopup(`<strong style="color:#f1f5f9">${p.label}</strong><br><span style="color:#94a3b8">Load: <strong style="color:${p.color}">${p.load}</strong></span><br><span style="color:#94a3b8">${p.status}</span>`);
-    mapLayers.energy.push(m);
-  });
-}
-
-function toggleLayer(layer, btn) {
-  btn.classList.toggle('active');
-  layerVisibility[layer] = !layerVisibility[layer];
-  if (!mapInstance) return;
-  mapLayers[layer].forEach(m => {
-    if (layerVisibility[layer]) mapInstance.addLayer(m);
-    else mapInstance.removeLayer(m);
-  });
-}
-
-/* ============ LIVE DATA REFRESH ============ */
+// simulated live data refresh (would be BigQuery streaming in prod)
 function refreshLiveData() {
   if (charts.traffic) {
     const rd = getRegionData();
@@ -1173,12 +1124,11 @@ function refreshData() {
   showToast('🔄 City data refreshed from BigQuery');
 }
 
-/* ============ EXPORT ============ */
 function exportReport() {
   showToast('📊 Generating PDF report via Cloud Run... Download will start shortly.');
 }
 
-/* ============ TOAST NOTIFICATION ============ */
+// toast notification helper
 function showToast(message) {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
@@ -1207,7 +1157,7 @@ function showToast(message) {
   }, 3500);
 }
 
-/* ============ TECH STACK VIEW ============ */
+// render tech stack cards
 function renderTechStack() {
   const grid = document.getElementById('tech-grid');
   if (!grid) return;
@@ -1248,7 +1198,7 @@ function renderTechStack() {
   });
 }
 
-/* ============ INIT MAP with REGION ============ */
+// map init — uses current region to set center and load appropriate markers
 function initMap() {
   if (mapInstance) return;
   const rd = getRegionData();
@@ -1367,6 +1317,7 @@ function toggleLayer(layer, btn) {
     else mapInstance.removeLayer(m);
   });
 }
+
 
 /* ============ UTILITY ============ */
 function implementDecision(title) {

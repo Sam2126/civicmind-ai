@@ -1,4 +1,4 @@
-# 🏙️ CivicMind AI — Decision Intelligence Platform
+# CivicMind AI — Decision Intelligence for Indian Cities
 
 <div align="center">
 
@@ -9,93 +9,88 @@
 ![ADK](https://img.shields.io/badge/Agent_Dev_Kit-ADK-FF6F00?style=for-the-badge&logo=google-cloud)
 ![Firebase](https://img.shields.io/badge/Firebase-Hosting-FFCA28?style=for-the-badge&logo=firebase)
 
-**An AI-powered Decision Intelligence Platform transforming city data into actionable insights for every citizen and city official.**
+*GEN AI APAC Challenge — PS1: AI for Better Living & Smarter Communities*
 
-*GEN AI APAC Challenge — Problem Statement 1: AI for Better Living & Smarter Communities*
-
-🌐 **[Live Demo → https://civicmind-ai-apac.web.app](https://civicmind-ai-apac.web.app)**
+🌐 **[Live Demo → civicmind-ai-apac.web.app](https://civicmind-ai-apac.web.app)**
 
 </div>
 
 ---
 
-## 🗺️ System Architecture Flowchart
+## What is this?
 
-> A visual overview of how CivicMind AI processes city data through Google Cloud's AI stack to deliver smart decisions.
+Cities generate enormous amounts of data every day — traffic sensors, hospital queues, AQI readings, smart grid telemetry, citizen complaints. The problem is that most of this data sits in silos and by the time someone acts on it, the situation has already escalated.
+
+CivicMind AI is our attempt to fix that. It's a Decision Intelligence Platform built on Google Cloud that takes all this raw civic data and turns it into actionable insights in real time — whether that's detecting a hospital surge before it becomes a crisis, flagging a flood risk zone before it rains, or figuring out the most efficient bus routes for the next morning.
+
+We built it for two regions: **Mumbai Metropolitan Region** (20.7M people) and **Rajasthan State** (80M+ people), covering very different urban challenges — megacity congestion vs. desert heatwaves, renewable energy grid balancing, water scarcity, and heritage site crowd management.
+
+---
+
+## System Architecture
 
 ![CivicMind AI System Architecture](./public/architecture.png)
 
 ---
 
-## 🔄 AI Data-to-Decision Pipeline
-
-> Step-by-step flow from raw sensor data to actionable civic intelligence — powered by Gemini, Vertex AI, BigQuery, and ADK.
+## AI Data-to-Decision Pipeline
 
 ![CivicMind AI Pipeline](./public/pipeline.png)
 
 ---
 
-## 🎯 Problem Statement
+## The problem we're solving
 
-Modern communities generate massive volumes of structured and unstructured data from public services, transportation, healthcare, environmental monitoring, utility networks, and citizen feedback. **Transforming this raw data into actionable decisions remains a critical challenge.**
+City officials today lack tools to:
+- Spot emerging crises before they escalate (flood, hospital surge, AQI spike)
+- Make sense of data coming from dozens of different domains simultaneously
+- Get evidence-based recommendations fast enough to act on them
+- Engage with civic data through natural language instead of dashboards
 
-City officials lack the tools to:
-- Detect emerging crises before they escalate
-- Understand complex multi-domain relationships in civic data
-- Generate evidence-based recommendations at speed
-- Engage citizens through natural language
-
-**CivicMind AI solves all of this.**
+We've tried to address all four with a single platform.
 
 ---
 
-## 🤖 Gen AI Tools & Technologies Used
+## Google Cloud AI Services Used
 
-> Every feature of CivicMind AI is powered by Google Cloud's AI ecosystem. Here is a complete breakdown:
+| # | Service | What we use it for |
+|---|---|---|
+| 1 | **Gemini 1.5 Pro** | CivicChat NL Q&A, DecisionAssist chain-of-thought, alert summarization, RAG reasoning |
+| 2 | **Vertex AI AutoML** | PredictEngine — 7-day forecasting for traffic, energy, health, AQI |
+| 3 | **Vertex AI Embeddings** (text-embedding-004) | RAG pipeline — vectorizing queries over city documents |
+| 4 | **Vertex AI Vision** | Satellite imagery analysis, CCTV monitoring, AQI anomaly detection |
+| 5 | **Agent Development Kit (ADK v1.0)** | Multi-agent orchestration for bus routes, waste, emergency response |
+| 6 | **BigQuery** | Civic data warehouse + BigQuery ML anomaly detection (18 datasets) |
+| 7 | **Cloud Run** | Serverless AI inference API |
+| 8 | **Cloud Functions + Pub/Sub** | Event-driven sensor ingestion from 2,847+ IoT devices |
+| 9 | **Firebase Hosting** | Global CDN deployment |
+| 10 | **AlloyDB** | pgvector store for the RAG knowledge base |
 
-| # | AI Service | Version | Role in CivicMind AI |
-|---|---|---|---|
-| 1 | **Gemini 1.5 Pro** | Google DeepMind | CivicChat NL Q&A, DecisionAssist generation, Alert summarization, RAG-based reasoning |
-| 2 | **Vertex AI AutoML** | Google Cloud | PredictEngine — 7-day forecasting for traffic, energy, health, AQI |
-| 3 | **Vertex AI Embeddings** | text-embedding-004 | RAG pipeline — vectorizing queries and city documents for semantic search |
-| 4 | **Vertex AI Vision** | Gemini Vision | Satellite imagery analysis, CCTV traffic monitoring, AQI anomaly detection from factory imagery |
-| 5 | **Agent Development Kit (ADK)** | ADK v1.0 | Multi-agent orchestration for bus route optimization, waste management, emergency workflows |
-| 6 | **BigQuery** | Google Cloud | Civic data warehouse, BigQuery ML in-database analytics, 18 dataset streams |
-| 7 | **Cloud Run** | Google Cloud | Serverless AI inference API, scalable backend hosting |
-| 8 | **Cloud Functions** | Google Cloud | Event-driven sensor data ingestion, alert trigger pipeline |
-| 9 | **Pub/Sub** | Google Cloud | Real-time streaming from 2,847+ city sensors |
-| 10 | **Firebase Hosting** | Google Cloud | Global CDN deployment — https://civicmind-ai-apac.web.app |
-| 11 | **AlloyDB** | Google Cloud | Vector store for RAG knowledge base |
-| 12 | **Cloud Storage** | Google Cloud | Raw data lake for satellite imagery and historical records |
-
-### How Gen AI Is Used — Feature by Feature
+### How each feature maps to the stack
 
 ```
 CivicChat AI       → Gemini 1.5 Pro + Vertex AI Embeddings (RAG over BigQuery)
-Dashboard          → BigQuery real-time queries + Chart.js visualization
-PredictEngine      → Vertex AI AutoML time-series forecasting
-Alert Radar        → BigQuery ML anomaly detection + Gemini alert summarization
-DecisionAssist     → Gemini 1.5 Pro chain-of-thought reasoning + city KPIs
-GeoView            → Vertex AI Vision (satellite) + BigQuery GIS layers
-Automation         → Agent Development Kit (ADK) multi-agent workflows
-Deployment         → Cloud Run + Firebase Hosting (global CDN)
+Dashboard          → BigQuery real-time queries + Chart.js
+PredictEngine      → Vertex AI AutoML time-series
+Alert Radar        → BigQuery ML anomaly detection + Gemini summarization
+DecisionAssist     → Gemini 1.5 Pro chain-of-thought + city KPIs
+GeoView            → Vertex AI Vision + BigQuery GIS layers
+Agent Automation   → ADK v1.0 multi-agent workflows
+Hosting            → Firebase Hosting CDN
 ```
 
 ---
 
-## 🏙️ Coverage: Mumbai Metropolitan Region
+## Coverage
 
-### Key Data Points
-- **Population**: 20.7 Million
-- **Active Sensors**: 2,847
-- **Traffic Sensors**: 847 across key corridors
-- **AQI Stations**: 312 monitoring stations
-- **Hospital Network**: 47 facilities via HMS API
-- **Smart Grid Sensors**: 2,200 telemetry points
-- **Bus Routes**: 312 BEST routes + 3 Metro lines
+### Mumbai Metropolitan Region
 
-### Solution Areas Covered
-| Domain | CivicMind AI Feature | Impact |
+- Population: 20.7 million
+- Active sensors: 2,847 (traffic, AQI, grid, water)
+- Hospital network: 47 facilities via HMS API
+- Bus network: 312 BEST routes + 3 Metro lines
+
+| Domain | Feature | Projected Impact |
 |---|---|---|
 | 🚦 Urban Mobility | Traffic Dashboard + PredictEngine | 18% congestion reduction |
 | 🏥 Healthcare | Wait-time monitoring + surge prediction | 180K citizens get faster care |
@@ -103,34 +98,27 @@ Deployment         → Cloud Run + Firebase Hosting (global CDN)
 | ⚡ Energy | Smart Grid monitoring + load balancing | ₹4.2Cr annual savings |
 | 🚌 Public Transport | ADK bus route reoptimization | 18% fewer delays |
 | 🚨 Public Safety | Predictive patrol + AlertRadar | 34% incident reduction |
-| ♻️ Waste Management | IoT bin sensors + route AI | 22% efficiency gain |
-| 🌧️ Disaster Response | Flood prediction + NDRF pre-positioning | Pre-emptive evacuation |
 
----
+### Rajasthan State
 
-## 🏜️ Coverage: Rajasthan State
+- Capital: Jaipur | Area: 342,239 km²
+- Population: 80+ million
+- Active monitoring stations: 1,240
+- Solar generation: 4,000+ MW (Bhadla Solar Park — world's largest)
+- Water sources monitored: 34 reservoirs and dams
 
-### Key Data Points — Rajasthan
-- **Capital**: Jaipur | **State Area**: 342,239 km²
-- **Population**: 80+ Million
-- **Active Monitoring Stations**: 1,240
-- **Solar Generation Capacity**: 4,000+ MW (World's largest solar state)
-- **Water Sources Monitored**: 34 reservoirs + dams
-- **Heritage Sites**: 47 monitored for tourist crowd management
-
-### Rajasthan-Specific Solution Areas
-| Challenge | CivicMind AI Solution | Impact |
+| Challenge | CivicMind Solution | Impact |
 |---|---|---|
-| 🌡️ Extreme Heat (48°C+) | Heatwave AlertRadar + cooling shelter map | 8.1M SMS advisories issued |
+| 🌡️ Extreme Heat (48°C+) | Heatwave AlertRadar + cooling shelter map | 8.1M SMS advisories |
 | 💧 Water Scarcity | Bisalpur Dam monitoring + AI tanker routing | Smart water rationing |
-| ☀️ Solar Energy | Bhadla Solar Park optimization (2,245 MW) | 72% renewable target |
-| 🏰 Tourism | Amber Fort/Hawa Mahal crowd AI | Time-slot ticketing |
+| ☀️ Solar Grid | Bhadla Solar Park optimization | 72% renewable target |
+| 🏰 Tourism | Amber Fort / Hawa Mahal crowd AI | Timed entry slots |
 | 🌾 Agriculture | Irrigation demand-supply optimization | 15% water savings |
-| 🌪️ Dust Storms | AQI spike prediction + Thar dust tracking | Early warning system |
+| 🌪️ Dust Storms | AQI spike prediction + Thar tracking | Early warning system |
 
 ---
 
-## 🏗️ System Architecture (Mermaid)
+## Architecture (Mermaid)
 
 ```mermaid
 flowchart TB
@@ -187,7 +175,7 @@ flowchart TB
 
 ---
 
-## 🔄 AI Decision Pipeline (Mermaid)
+## AI Decision Pipeline (Mermaid)
 
 ```mermaid
 flowchart LR
@@ -224,105 +212,69 @@ flowchart LR
 
 ---
 
-## 🧠 Gen AI Architecture (Mermaid)
-
-```mermaid
-mindmap
-  root((CivicMind AI\nGen AI Stack))
-    Gemini 1.5 Pro
-      CivicChat NL Interface
-      RAG Document Q&A
-      DecisionAssist Generation
-      Alert Summarization
-    Vertex AI
-      AutoML Traffic Forecast
-      AutoML Energy Forecast
-      AutoML Health Forecast
-      Embeddings for RAG
-      Vision for Satellite AI
-    Agent Dev Kit ADK
-      Bus Route Optimization
-      Emergency Pre-positioning
-      Waste Collection Routing
-      Automated Civic Workflows
-    BigQuery
-      18 Civic Data Streams
-      Real-time SQL Analytics
-      BigQuery ML Anomaly Detection
-      Historical Pattern Mining
-    Infrastructure
-      Cloud Run Serverless API
-      Cloud Functions Triggers
-      Pub/Sub Streaming
-      Firebase Hosting CDN
-      AlloyDB Vector Store
-```
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 CivicMind-AI/
 ├── public/
-│   ├── index.html          # Full SPA — 6 AI-powered views
-│   ├── styles.css          # Premium dark design system (700+ lines)
-│   ├── app.js              # Interactive logic + AI responses (1000+ lines)
-│   ├── architecture.png    # System architecture flowchart
-│   └── pipeline.png        # AI pipeline flowchart
-├── firebase.json           # Firebase Hosting config
-├── .firebaserc             # Firebase project: civicmind-ai-apac
-└── README.md               # This documentation
+│   ├── index.html          # SPA with 6 AI-powered views
+│   ├── styles.css          # Dark design system
+│   ├── app.js              # All interactive logic
+│   ├── architecture.png    # System architecture diagram
+│   └── pipeline.png        # AI pipeline diagram
+├── fill_ppt.py             # Submission deck generator
+├── firebase.json
+└── README.md
 ```
 
 ---
 
-## 🚀 Setup & Deployment
+## Running locally
 
 ```bash
-# Local development
-cd public && npx serve .     # → http://localhost:3000
+# serve the frontend
+cd public && npx serve .     # opens at http://localhost:3000
 
-# Deploy to Firebase
+# deploy to Firebase
 npm install -g firebase-tools
 firebase login
 firebase deploy --project civicmind-ai-apac
-# → Live: https://civicmind-ai-apac.web.app
 ```
 
 ---
 
-## ⚡ AI Acceleration Evidence
+## Performance numbers
 
-| Metric | Without AI | With CivicMind AI | Improvement |
+| What | Before AI | With CivicMind AI | Improvement |
 |---|---|---|---|
-| Traffic incident detection | 25–40 min | **< 90 seconds** | **95% faster** |
-| Bus route optimization | 8 hours | **6 minutes (ADK)** | **98% faster** |
-| AQI anomaly alert | 2–4 hours | **< 2 minutes** | **98% faster** |
-| Decision recommendation | Days of analysis | **< 5 seconds (Gemini)** | **10,000x faster** |
-| Data scale processed | Thousands of records | **2.4M+ BigQuery** | **1,000x scale** |
-| Heatwave early warning | Next day (manual) | **6 hours ahead (AI)** | **24x earlier** |
-| Water tanker routing | Manual dispatch | **AI-optimized real-time** | **40% more efficient** |
+| Traffic incident detection | 25–40 min | < 90 seconds | 95% faster |
+| Bus route optimization | 8 hours | 6 minutes (ADK) | 98% faster |
+| AQI anomaly alert | 2–4 hours | < 2 minutes | 98% faster |
+| Decision recommendation | Days of analysis | < 5 seconds (Gemini) | 10,000x faster |
+| Heatwave early warning | Next day (manual) | 6 hours ahead | 24x earlier |
+| Water tanker routing | Manual dispatch | AI-optimized real-time | 40% more efficient |
 
 ---
 
-## 🔒 Responsible AI
+## Responsible AI
 
-- ✅ **Transparency**: Every AI answer shows data source + confidence score
-- ✅ **Explainability**: Decisions include step-by-step reasoning
-- ✅ **Bias Mitigation**: Multi-source data fusion reduces single-source bias
-- ✅ **Human Oversight**: No automated action without human approval
-- ✅ **Privacy**: No PII stored or processed
-- ✅ **Auditability**: Full BigQuery audit trail of all AI decisions
+We've tried to make sure CivicMind AI isn't a black box:
+
+- Every AI answer shows the data source and a confidence score
+- DecisionAssist includes step-by-step reasoning, not just a conclusion
+- Multi-source data fusion to reduce single-source bias
+- No automated action without a human approval step
+- No PII stored or processed at any point
+- Full BigQuery audit trail of all AI decisions
 
 ---
 
 <div align="center">
 
-**Built for GEN AI APAC Challenge 🏆 · Problem Statement 1 · AI for Better Living & Smarter Communities**
+*Built for GEN AI APAC Challenge 🏆 · PS-1 · AI for Better Living & Smarter Communities*
 
 *From raw data to smart decisions — for every citizen, every community.*
 
-**Live at: [https://civicmind-ai-apac.web.app](https://civicmind-ai-apac.web.app)**
+**[civicmind-ai-apac.web.app](https://civicmind-ai-apac.web.app)**
 
 </div>
